@@ -88,7 +88,7 @@
       charset: utf8
     delegate_to: localhost  
 
-  - name: Exec comand AWS Cognito create user
+  - name: WMS - Create user - AWS Cognito 
     command: >
       aws cognito-idp admin-create-user
       --user-pool-id us-east-1_n0saO3hxS
@@ -102,7 +102,7 @@
       AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     become: no
 
-  - name: Add user in group admin
+  - name: WMS - Add user in group admin - AWS Cognito 
     command: >
       aws cognito-idp admin-add-user-to-group
       --user-pool-id us-east-1_n0saO3hxS
