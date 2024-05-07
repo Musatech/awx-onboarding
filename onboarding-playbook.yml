@@ -4,120 +4,80 @@
     - vault.yml
     - vars.json
   tasks:
-  - name: Install AWS CLI
-    command: >
-      pip install awscli
-    become: yes  # Use "yes" se for necessário privilégios de superusuário (sudo) para instalar pacotes.
+    - pip:
+        name:
+          - google-api-core==1.15.0
+          - google-api-python-client==1.8.4
+          - google-auth
+        extra_args: "--disable-pip-version-check --user"
 
-  - name: Install package Google
-  - pip:
-      name:
-        - google-api-core==1.15.0
-        - google-api-python-client==1.8.4
-        - google-auth
-      extra_args: "--disable-pip-version-check --user"
+    - name: Manage users
+      gsuite_user:
+        google_private_key: '{{ google_private_key }}'
+        google_subject: 'lyon@musa.co'
+        email: '{{ email }}'
+        familyName: '{{ lastname }}'
+        givenName: '{{ firstname }}'
+        employeeId: '{{ email }}'
+        password: '{{ item.gsuite.password | default("change.this.password.now!") }}'
+        changePasswordAtNextLogin: '{{ item.gsuite.changePasswordAtNextLogin | default(true) }}'
+        orgUnitPath: '{{ orgUnitPath | default("/") }}'
+        aliases: '{{ email }}'
+        groups: '{{ item.gsuite.groups }}'
+        suspended: false
+        transferUserEmail: '{{ item.gsuite.transferUserEmail | default("") }}'
+        state: '{{ item.gsuite.state | default("present") }}'
+      loop: "{{ user_details }}"
 
-  - name: Manage users
-    gsuite_user:
-      google_private_key: '{{ google_private_key }}'
-      google_subject: 'lyon@musa.co'
-      email: '{{ email }}'
-      familyName: '{{ lastname }}'
-      givenName: '{{ firstname }}'
-      employeeId: '{{ email }}'
-      password: '{{ item.gsuite.password | default("change.this.password.now!") }}'
-      changePasswordAtNextLogin: '{{ item.gsuite.changePasswordAtNextLogin | default(true) }}'
-      orgUnitPath: '{{ orgUnitPath | default("/") }}'
-      aliases: '{{ email }}'
-      groups: '{{ item.gsuite.groups }}'
-      suspended: false
-      transferUserEmail: '{{ item.gsuite.transferUserEmail | default("") }}'
-      state: '{{ item.gsuite.state | default("present") }}'
-    loop: "{{ user_details }}"
-
-  - name: Send notification message via Slack
-    slack:
-      token: '{{ token_slack }}'
-      msg: '{{ email }} Criado'
-      channel: '#ansible-test'
+    - name: Send notification message via Slack
+      slack:
+        token: '{{ token_slack }}'
+        msg: '{{ email }} Criado'
+        channel: '#ansible-test'
 
 
-  - name: Sending an e-mail using Gmail SMTP servers - BoasVindas
-    mail:
-      host: smtp.gmail.com
-      port: 587
-      username: "{{ email_username }}"
-      password: "{{ email_password }}"
-      to: "{{ email_colab }}"
-      cc: "{{ email_gestor }}"
-      subject: "BOAS-VINDAS À MUSA ♻️🤖"
-      body: "{{ lookup ('template','boas_vindas_musa.html.j2') }}"
-      subtype: html
-      charset: utf8
-    delegate_to: localhost
+    - name: Sending an e-mail using Gmail SMTP servers - BoasVindas
+      mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ email_username }}"
+        password: "{{ email_password }}"
+        to: "{{ email_colab }}"
+        cc: "{{ email_gestor }}"
+        subject: "BOAS-VINDAS À MUSA ♻️🤖"
+        body: "{{ lookup ('template','boas_vindas_musa.html.j2') }}"
+        subtype: html
+        charset: utf8
+      delegate_to: localhost
 
-  - name: Sending an e-mail using Gmail SMTP servers - LowCost
-    mail:
-      host: smtp.gmail.com
-      port: 587
-      username: "{{ email_username }}"
-      password: "{{ email_password }}"
-      to: roberto.inacio@lowcost.com.br, lyon@musa.co, daniela@musa.co
-      cc: "{{ email_gestor }}"
-      subject: "NOVO COLABORADOR NA MUSA 🤖 - {{ firstname }}"
-      body: "{{ lookup ('template','lowcost_email.html.j2') }}"
-      subtype: html
-      charset: utf8
-    delegate_to: localhost
-  
-  - name: Create user Atlassian
-    shell: >
-      curl --request POST --url "https://musatecnologia.atlassian.net/rest/api/3/user" --user "lyon@musa.co:{{ api_token_atlassian }}" --header "Accept: application/json" --header "Content-Type: application/json" --data "{ \"emailAddress\": \"{{ email }}\"}"
+    - name: Sending an e-mail using Gmail SMTP servers - LowCost
+      mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ email_username }}"
+        password: "{{ email_password }}"
+        to: roberto.inacio@lowcost.com.br, leandromachado@musa.co, daniela@musa.co
+        cc: "{{ email_gestor }}"
+        subject: "NOVO COLABORADOR NA MUSA 🤖 - {{ firstname }}"
+        body: "{{ lookup ('template','lowcost_email.html.j2') }}"
+        subtype: html
+        charset: utf8
+      delegate_to: localhost
 
-  - name: Sending an e-mail using Gmail SMTP servers - Convite Slack
-    mail:
-      host: smtp.gmail.com
-      port: 587
-      username: "{{ email_username }}"
-      password: "{{ email_password }}"
-      to: "{{ email_colab }}"
-      cc: daniela@musa.co
-      subject: "Musa convidou você para Entrar no Slack"
-      body: "{{ lookup ('template','convite_slack.html.j2') }}"
-      subtype: html
-      charset: utf8
-    delegate_to: localhost
+    - name: Create user Atlassian
+      shell: >
+        curl --request POST --url "https://musatecnologia.atlassian.net/rest/api/3/user" --user "lyon@musa.co:{{ api_token_atlassian }}" --header "Accept: application/json" --header "Content-Type: application/json" --data "{ \"emailAddress\": \"{{ email }}\"}"
 
-  - name: WMS - Create user - AWS Cognito
-    cognito_admin_create_user:
-      UserPoolId: "us-east-1_n0saO3hxS"
-      username: "{{ phone }}"
-      desired_delivery_mediums:
-        - SMS
-      message_action: "SUPPRESS"
-      temporary_password: Musa@123
-      user_attributes:
-        - Name: "phone_number"
-          Value: "{{ phone }}"
-        - Name: "email"
-          Value: "{{ email }}"
-        - Name: "email_verified"
-          Value: "true"
-        - Name: "phone_number_verified"
-          Value: "true"
-    environment:
-      AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-      AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-    become: no
-
-  - name: WMS - Add user in group admin - AWS Cognito
-    command: >
-      aws cognito-idp admin-add-user-to-group
-      --user-pool-id us-east-1_n0saO3hxS
-      --username "{{ phone }}"
-      --group-name admin
-    environment:
-      AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-      AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-    become: no
-    delegate_to: localhost
+    - name: Sending an e-mail using Gmail SMTP servers - Convite Slack
+      mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ email_username }}"
+        password: "{{ email_password }}"
+        to: "{{ email_colab }}"
+        cc: daniela@musa.co
+        subject: "Musa convidou você para Entrar no Slack"
+        body: "{{ lookup ('template','convite_slack.html.j2') }}"
+        subtype: html
+        charset: utf8
+      delegate_to: localhost
