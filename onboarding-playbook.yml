@@ -82,24 +82,26 @@
         charset: utf8
       delegate_to: localhost
 
-
     - name: WMS - Create user - AWS Cognito
-      cognito_admin_create_user:
-        UserPoolId: "us-east-1_n0saO3hxS"
-        username: "{{ phone }}"
-        desired_delivery_mediums:
-          - SMS
-        message_action: "SUPPRESS"
-        temporary_password: Musa@123
-        user_attributes:
-          - Name: "phone_number"
-            Value: "{{ phone }}"
-          - Name: "email"
-            Value: "{{ email }}"
-          - Name: "email_verified"
-            Value: "true"
-          - Name: "phone_number_verified"
-            Value: "true"
+      command: >
+        aws cognito-idp admin-create-user
+        --user-pool-id us-east-1_n0saO3hxS
+        --username "{{ phone }}"
+        --desired-delivery-mediums SMS
+        --message-action SUPPRESS
+        --temporary-password Musa@123
+        --user-attributes Name=email,Value='{{ email }}' Name=phone_number,Value="{{ phone }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+      become: no
+
+    - name: WMS - Add user in group admin - AWS Cognito
+      command: >
+        aws cognito-idp admin-add-user-to-group
+        --user-pool-id us-east-1_n0saO3hxS
+        --username "{{ phone }}"
+        --group-name admin
       environment:
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
