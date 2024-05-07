@@ -86,7 +86,7 @@
       body: "{{ lookup ('template','convite_slack.html.j2') }}"
       subtype: html
       charset: utf8
-    delegate_to: localhost  
+    delegate_to: localhost
 
   - name: WMS - Create user - AWS Cognito 
     command: >
@@ -101,6 +101,7 @@
       AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
       AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     become: no
+    delegate_to: localhost
 
   - name: WMS - Add user in group admin - AWS Cognito 
     command: >
@@ -112,3 +113,4 @@
       AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
       AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     become: no
+    delegate_to: localhost
