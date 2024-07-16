@@ -14,7 +14,7 @@
     - name: Manage users
       gsuite_user:
         google_private_key: '{{ google_private_key }}'
-        google_subject: 'lyon@musa.co'
+        google_subject: 'francisco.pereira@musa.co'
         email: '{{ email }}'
         familyName: '{{ lastname }}'
         givenName: '{{ firstname }}'
@@ -34,7 +34,6 @@
         token: '{{ token_slack }}'
         msg: '{{ email }} Criado'
         channel: '#ansible-test'
-
 
     - name: Sending an e-mail using Gmail SMTP servers - BoasVindas
       mail:
