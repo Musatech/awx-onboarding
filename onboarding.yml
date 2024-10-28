@@ -7,7 +7,7 @@
       command: >
         aws cognito-idp admin-create-user
         --user-pool-id "{{ user_pool_id }}"
-        --username "{{ item.phone }}"
+        --username "{{ phone }}"
         --desired-delivery-mediums SMS
         --message-action SUPPRESS
         --temporary-password "{{ item.password }}"
