@@ -1,7 +1,7 @@
 - name: Manage Google Workspace users
   hosts: localhost
   vars_files:
-    - vault.yml
+    - vaults.yaml
     - vars.json
   tasks:
     - pip:
