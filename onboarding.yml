@@ -11,7 +11,6 @@
           - google-auth
           - google-auth-httplib2
           - google-auth-oauthlib
-          - google-api-python-client
         state: present
         extra_args: "--disable-pip-version-check --user"
 
