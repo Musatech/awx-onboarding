@@ -16,9 +16,13 @@
       debug:
         msg: "{{ google_credentials.google_private_key }}"
 
+    - name: Check google_credentials type
+      debug:
+        var: google_credentials
+
     - name: Manage users
       gsuite_user:
-        google_credentials: '{{ google_credentials | from_json }}'
+        google_private_key: '{{ google_credentials.google_private_key }}'
         google_subject: 'francisco.pereira@musa.co'
         email: '{{ email }}'
         familyName: '{{ lastname }}'
