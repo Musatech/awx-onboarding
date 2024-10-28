@@ -11,6 +11,11 @@
           - google-auth
         extra_args: "--disable-pip-version-check --user"
 
+
+    - name: Check google_private_key
+      debug:
+        msg: "{{ google_credentials.google_private_key }}"
+
     - name: Manage users
       gsuite_user:
         google_private_key: '{{ google_credentials.google_private_key }}'
