@@ -18,7 +18,7 @@
 
     - name: Manage users
       gsuite_user:
-        google_private_key: '{{ google_credentials.google_private_key }}'
+        google_credentials: '{{ google_credentials | from_json }}'
         google_subject: 'francisco.pereira@musa.co'
         email: '{{ email }}'
         familyName: '{{ lastname }}'
