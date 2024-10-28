@@ -2,6 +2,7 @@
   hosts: localhost
   vars_files:
     - vaults.yaml
+    - vars.json
   tasks:
     - name: 'Install packages to create new user on Google Admin Console'
       pip:
