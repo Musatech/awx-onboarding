@@ -1,0 +1,24 @@
+- name: 'Create access to new users in the organization Musa'
+  hosts: localhost
+  vars_files:
+    - vaults.yaml
+  tasks:
+    - name: Create User - AWS Cognito
+      community.aws.aws_cognito_identity_provider:
+        user_pool_id: "{{ user_pool_id }}"
+        username: "{{ item.phone }}"
+        desired_delivery_mediums: "SMS"
+        message_action: "SUPPRESS"
+        temporary_password: "{{ item.password }}"
+        user_attributes:
+          - Name: email
+            Value: "{{ item.email }}"
+          - Name: phone_number
+            Value: "{{ item.phone }}"
+      loop: "{{ users }}"
+      register: result
+      retries: 3
+      delay: 10
+      failed_when:
+        - result.rc != 0
+        - "'error' in result.stderr.lower()"
