@@ -4,7 +4,6 @@
     - vaults.yaml
   tasks:
     - name: Create User - AWS Cognito
-      description: Configure access on WMS
       command: >
         aws cognito-idp admin-create-user
         --user-pool-id "{{ user_pool_id }}"
