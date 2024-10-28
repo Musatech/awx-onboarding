@@ -44,7 +44,7 @@
 
     - name: 'Create new e-mail to Google Admin Console'
       gsuite_user:
-        google_private_key: '{{ google_credentials.google_private_key }}'
+        google_private_key: '{{ google_private_key }}'
         google_subject: '{{ google_admin_user }}'
         email: '{{ email }}'
         familyName: '{{ lastname }}'
