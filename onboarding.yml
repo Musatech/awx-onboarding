@@ -3,7 +3,7 @@
   vars_files:
     - vaults.yaml
   tasks:
-    - name: Create User - AWS Cognito
+    - name: Create User to WMS - AWS Cognito
       command: >
         aws cognito-idp admin-create-user
         --user-pool-id "{{ user_pool_id }}"
@@ -17,9 +17,15 @@
         AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
         AWS_DEFAULT_REGION: "us-east-1"
       become: no
-      register: result
-      failed_when: "'error' in result.stderr"
 
-    - name: Display formatted JSON result
-      debug:
-        msg: "{{ result.stdout | from_json | to_nice_json }}"
+    - name: Add user in group admin to access WMS - AWS Cognito
+      command: >
+        aws cognito-idp admin-add-user-to-group
+        --user-pool-id "{{ user_pool_id }}"
+        --username "{{ phone }}"
+        --group-name "{{ group_name }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_DEFAULT_REGION: "us-east-1"
+      become: no
